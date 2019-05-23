@@ -29,9 +29,10 @@ class Tracker:
 
         self.parameters = self.get_parameters()
         self.tracker_class = tracker_module.get_tracker_class()
-
+        #ssddd
         self.default_visualization = getattr(self.parameters, 'visualization', False)
         self.default_debug = getattr(self.parameters, 'debug', 0)
+        #
 
     def run(self, seq, visualization=None, debug=None):
         """Run tracker on sequence.
@@ -60,6 +61,17 @@ class Tracker:
         self.parameters.free_memory()
 
         return output_bb, execution_times
+
+    def runvot(self, debug=None):
+        """Run the tracker with the webcam.
+        args:
+            debug: Debug level.
+        """
+
+        self.parameters.tracker_name = self.name
+        self.parameters.param_name = self.parameter_name
+        tracker = self.tracker_class(self.parameters)
+        return tracker
 
     def run_webcam(self, debug=None):
         """Run the tracker with the webcam.
@@ -90,7 +102,6 @@ class Tracker:
 
         if self.run_id is not None:
             pickle.dump(params, open(parameter_file, 'wb'))
-
         return params
 
 

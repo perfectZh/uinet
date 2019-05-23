@@ -57,7 +57,7 @@ class MultiResolutionExtractor(ExtractorBase):
         features: List of features.
     """
     def __init__(self, features):
-        super().__init__(features)
+        super().__init__(features) #继承父类 self.features= features
         self.is_color = None
 
     def stride(self):

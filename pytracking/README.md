@@ -82,7 +82,7 @@ The pytracking repository includes some general libraries for implementing and d
 ```python
 from .tracker_file import TrackerClass
 
-def get_tracker_class():
+def ():
     return TrackerClass
 ```
 Here, ```TrackerClass``` is the name of your tracker class. See the [file for ATOM](tracker/atom/__init__.py) as reference.

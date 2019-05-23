@@ -20,6 +20,7 @@ class BaseTracker:
         """Overload this function in your tracker. This should track in the frame and update the model."""
         raise NotImplementedError
 
+
     def track_sequence(self, sequence):
         """Run tracker on a sequence."""
 
@@ -51,6 +52,9 @@ class BaseTracker:
                 self.visualize(image, state)
 
         return tracked_bb, times
+
+   
+        
 
 
     def track_webcam(self):

@@ -76,7 +76,7 @@ class AtomIoUNet(nn.Module):
 
         proposals2 = proposals2.view(batch_size*num_test_images, -1, 4)
         pred_iou = self.predict_iou(filter, iou_feat, proposals2)
-        return pred_iou.view(num_test_images, batch_size, -1)
+        return pred_iou.view(num_test_images, batch_size, -1) ##The view function is meant to reshape the tensor.
 
     def predict_iou(self, filter, feat2, proposals):
         fc34_3_r, fc34_4_r = filter

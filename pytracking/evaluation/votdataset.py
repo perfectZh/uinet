@@ -119,6 +119,7 @@ class VOTDatasetClass(BaseDataset):
                         'tiger',
                         'traffic',
                         'wiper',
+                        'test',
                         'zebrafish1']
 
         return sequence_list

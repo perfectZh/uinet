@@ -141,10 +141,10 @@ class ATOMResNet18(MultiFeatureBase):
             output_features = self.net.extract_features(im, self.feature_layers)
 
         # Store the raw resnet features which are input to iounet
-        self.iounet_backbone_features = TensorList([output_features[layer].clone() for layer in self.iounet_feature_layers])
+        self.iounet_backbone_features = TensorList([output_features[layer].clone() for layer in self.iounet_feature_layers]) #两层特征提取出来。
 
         # Store the processed features from iounet, just before pooling
         with torch.no_grad():
-            self.iounet_features = TensorList(self.iou_predictor.get_iou_feat(self.iounet_backbone_features))
+            self.iounet_features = TensorList(self.iou_predictor.get_iou_feat(self.iounet_backbone_features)) # 这里提取出来的是resnet-18 block3,block4.得到的iou输入特征。
 
-        return TensorList([output_features[layer] for layer in self.output_layers])
+        return TensorList([output_features[layer] for layer in self.output_layers]) #输出的为 两层特征。

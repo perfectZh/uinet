@@ -17,7 +17,7 @@ def parameters():
     deep_params = TrackerParams()
 
     # Patch sampling parameters
-    params.max_image_sample_size = (14 * 16) ** 2   # Maximum image sample size
+    params.max_image_sample_size = (14 * 16) ** 2   # Maximum image sample size  224 224
     params.min_image_sample_size = (14 * 16) ** 2   # Minimum image sample size
     params.search_area_scale = 4                    # Scale relative to target size
     params.feature_size_odd = False                 # Good to use False for even-sized kernels and vice versa
@@ -98,6 +98,7 @@ def parameters():
     deep_fparams = FeatureParams(feature_params=[deep_params])
     deep_feat = deep.ATOMResNet18(net_path='atom_default.pth', output_layers=['layer3'], fparams=deep_fparams,
                                   normalize_power=2)
+
     params.features = MultiResolutionExtractor([deep_feat])
 
     params.vot_anno_conversion_type = 'preserve_area'

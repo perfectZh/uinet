@@ -11,6 +11,7 @@ from pytracking.libs.optimization import GaussNewtonCG, ConjugateGradient, Gradi
 from .optim import ConvProblem, FactorizedConvProblem
 from pytracking.features import augmentation
 
+Debug = False
 
 class ATOM(BaseTracker):
 
@@ -29,7 +30,7 @@ class ATOM(BaseTracker):
 
         # Initialize features
         self.initialize_features()
-
+ 
         # Check if image is color
         self.params.features.set_is_color(image.shape[2] == 3)
 
@@ -196,7 +197,7 @@ class ATOM(BaseTracker):
             self.filter_optimizer = GradientDescentL2(self.conv_problem, self.filter, self.params.optimizer_step_length, self.params.optimizer_momentum, debug=(self.params.debug >= 3), fig_num=12)
 
         # Transfer losses from previous optimization
-        if self.params.update_projection_matrix:
+        if self.params.update_projection_matrix: 
             self.filter_optimizer.residuals = self.joint_optimizer.residuals
             self.filter_optimizer.losses = self.joint_optimizer.losses
 
@@ -224,16 +225,20 @@ class ATOM(BaseTracker):
 
         # Get sample
         sample_pos = self.pos.round()
+        if (Debug) :
+            print("sample_pos ",sample_pos)
         sample_scales = self.target_scale * self.params.scale_factors
-        test_x = self.extract_processed_sample(im, self.pos, sample_scales, self.img_sample_sz)
+        test_x = self.extract_processed_sample(im, self.pos, sample_scales, self.img_sample_sz) #提取的特征 经过投影处理
 
         # Compute scores
-        scores_raw = self.apply_filter(test_x)
-        translation_vec, scale_ind, s, flag = self.localize_target(scores_raw)
-
+        scores_raw = self.apply_filter(test_x) #把特征用filter进行处理？
+        translation_vec, scale_ind, s, flag = self.localize_target(scores_raw) #得到粗略的定位
+        if (Debug) :
+            print("translation_vec ",translation_vec," scores: ",s)
         # Update position and scale
         if flag != 'not_found':
             if self.use_iou_net:
+                #使用ioutnet来更新
                 update_scale_flag = getattr(self.params, 'update_scale_when_uncertain', True) or flag != 'uncertain'
                 if getattr(self.params, 'use_classifier', True):
                     self.update_state(sample_pos + translation_vec)
@@ -244,7 +249,7 @@ class ATOM(BaseTracker):
         if self.params.debug >= 2:
             show_tensor(s[scale_ind,...], 5, title='Max score = {:.2f}'.format(torch.max(s[scale_ind,...]).item()))
 
-
+        
         # ------- UPDATE ------- #
 
         # Check flags and set learning rate if hard negative
@@ -283,19 +288,31 @@ class ATOM(BaseTracker):
 
     def localize_target(self, scores_raw):
         # Weighted sum (if multiple features) with interpolation in fourier domain
-        weight = self.fparams.attribute('translation_weight', 1.0)
-        scores_raw = weight * scores_raw
+        weight = self.fparams.attribute('translation_weight', 1.0) #weight 没什么用
+        if (Debug) :
+            print("weight : ",weight)  #
+        scores_raw = weight * scores_raw  # 
+        if (Debug) :
+            print("scores_raw: ",scores_raw)
         sf_weighted = fourier.cfft2(scores_raw) / (scores_raw.size(2) * scores_raw.size(3))
         for i, (sz, ksz) in enumerate(zip(self.feature_sz, self.kernel_size)):
+            #    """Shift a sample a in the Fourier domain.
             sf_weighted[i] = fourier.shift_fs(sf_weighted[i], math.pi * (1 - torch.Tensor([ksz[0]%2, ksz[1]%2]) / sz))
-
+        #"""Sum a list of Fourier series expansions."""
         scores_fs = fourier.sum_fs(sf_weighted)
+        if (Debug) :
+            print("scores_fs : ",scores_fs)
+        
+        #"""Samples the Fourier series."""
         scores = fourier.sample_fs(scores_fs, self.output_sz)
-
+        if (Debug) :
+            print("scores: ",scores)
         if self.output_window is not None and not getattr(self.params, 'perform_hn_without_windowing', False):
             scores *= self.output_window
 
         if getattr(self.params, 'advanced_localization', False):
+            if (Debug) :
+                print("advanced:  ")
             return self.localize_advanced(scores)
 
         # Get maximum
@@ -387,6 +404,7 @@ class ATOM(BaseTracker):
 
 
     def extract_sample(self, im: torch.Tensor, pos: torch.Tensor, scales, sz: torch.Tensor):
+        #提取特征
         return self.params.features.extract(im, pos, scales, sz)
 
     def get_iou_features(self):
@@ -397,9 +415,11 @@ class ATOM(BaseTracker):
 
     def extract_processed_sample(self, im: torch.Tensor, pos: torch.Tensor, scales, sz: torch.Tensor) -> (TensorList, TensorList):
         x = self.extract_sample(im, pos, scales, sz)
+        #投影矩阵
         return self.preprocess_sample(self.project_sample(x))
 
     def preprocess_sample(self, x: TensorList) -> (TensorList, TensorList):
+
         if getattr(self.params, '_feature_window', False):
             x = x * self.feature_window
         return x
@@ -687,7 +707,7 @@ class ATOM(BaseTracker):
         iou_features = TensorList([x[scale_ind:scale_ind+1,...] for x in iou_features])
 
         init_boxes = init_box.view(1,4).clone()
-        if self.params.num_init_random_boxes > 0:
+        if self.params.num_init_random_boxes > 0: #产生9个额外的bounding box 
             # Get random initial boxes
             square_box_sz = init_box[2:].prod().sqrt()
             rand_factor = square_box_sz * torch.cat([self.params.box_jitter_pos * torch.ones(2), self.params.box_jitter_sz * torch.ones(2)])
@@ -698,7 +718,7 @@ class ATOM(BaseTracker):
             init_boxes = torch.cat([new_center - new_sz/2, new_sz], 1)
             init_boxes = torch.cat([init_box.view(1,4), init_boxes])
 
-        # Refine boxes by maximizing iou
+        # Refine boxes by maximizing iou# 对于每个bb,5次梯度下降迭代最大化IOU得到最后bb
         output_boxes, output_iou = self.optimize_boxes(iou_features, init_boxes)
 
         # Remove weird boxes with extreme aspect ratios
@@ -707,7 +727,6 @@ class ATOM(BaseTracker):
         keep_ind = (aspect_ratio < self.params.maximal_aspect_ratio) * (aspect_ratio > 1/self.params.maximal_aspect_ratio)
         output_boxes = output_boxes[keep_ind,:]
         output_iou = output_iou[keep_ind]
-
         # If no box found
         if output_boxes.shape[0] == 0:
             return
@@ -715,10 +734,9 @@ class ATOM(BaseTracker):
         # Take average of top k boxes
         k = getattr(self.params, 'iounet_k', 5)
         topk = min(k, output_boxes.shape[0])
-        _, inds = torch.topk(output_iou, topk)
-        predicted_box = output_boxes[inds, :].mean(0)
+        _, inds = torch.topk(output_iou, topk) #找到topk个 bb
+        predicted_box = output_boxes[inds, :].mean(0) #把topk个取平均值
         predicted_iou = output_iou.view(-1, 1)[inds, :].mean(0)
-
         # Update position
         new_pos = predicted_box[:2] + predicted_box[2:]/2 - (self.iou_img_sample_sz - 1) / 2
         new_pos = new_pos.flip((0,)) * sample_scale + sample_pos
@@ -739,24 +757,26 @@ class ATOM(BaseTracker):
     def optimize_boxes(self, iou_features, init_boxes):
         # Optimize iounet boxes
         output_boxes = init_boxes.view(1, -1, 4).to(self.params.device)
-        step_length = self.params.box_refinement_step_length
+        step_length = self.params.box_refinement_step_length ## Gradient step length in the bounding box refinement
 
-        for i_ in range(self.params.box_refinement_iter):
+        for i_ in range(self.params.box_refinement_iter): #5 次梯度下降迭代最优化得到最佳bb 
             # forward pass
             bb_init = output_boxes.clone().detach()
             bb_init.requires_grad = True
 
-            outputs = self.iou_predictor.predict_iou(self.target_feat, iou_features, bb_init)
-
+            outputs = self.iou_predictor.predict_iou(self.target_feat, iou_features, bb_init) #返回预测的iou值
+            if (Debug) :
+                print("outputs",outputs)
             if isinstance(outputs, (list, tuple)):
                 outputs = outputs[0]
-
-            outputs.backward(gradient = torch.ones_like(outputs))
-
+            
+            #相当于在线传播了
+            outputs.backward(gradient = torch.ones_like(outputs)) #ones_like全一矩阵 网络进行反向传播一次 
+           
             # Update proposal
-            output_boxes = bb_init + step_length * bb_init.grad * bb_init[:, :, 2:].repeat(1, 1, 2)
-            output_boxes.detach_()
+            output_boxes = bb_init + step_length * bb_init.grad * bb_init[:, :, 2:].repeat(1, 1, 2) #repeat(X) 重复x次，
+            output_boxes.detach_() #将输出进行分离，就不会再次求梯度。不需要梯度
 
-            step_length *= self.params.box_refinement_step_decay
+            step_length *= self.params.box_refinement_step_decay # # Multiplicative step length decay (1 means no decay)
 
         return output_boxes.view(-1,4).cpu(), outputs.detach().view(-1).cpu()

@@ -57,7 +57,7 @@ def run_tracker(tracker_name, tracker_param, run_id=None, dataset_name='otb', se
 
     trackers = [Tracker(tracker_name, tracker_param, run_id)]
 
-    run_dataset(dataset, trackers, debug, threads)
+    run_dataset(dataset, trackers, dataset_name,debug, threads)
 
 
 def main():
@@ -68,7 +68,7 @@ def main():
     parser.add_argument('--dataset', type=str, default='otb', help='Name of dataset (otb, nfs, uav, tpl, vot, tn, gott, gotv, lasot).')
     parser.add_argument('--sequence', type=str, default=None, help='Sequence number or name.')
     parser.add_argument('--debug', type=int, default=0, help='Debug level.')
-    parser.add_argument('--threads', type=int, default=0, help='Number of threads.')
+    parser.add_argument('--threads', type=int, default=8, help='Number of threads.')
 
     args = parser.parse_args()
 

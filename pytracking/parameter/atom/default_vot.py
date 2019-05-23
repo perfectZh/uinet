@@ -13,7 +13,7 @@ def parameters():
     # Use GPU or not (IoUNet requires this to be True)
     params.use_gpu = True
 
-    # Feature specific parameters
+    # Feature specific parameterse
     deep_params = TrackerParams()
 
     # Patch sampling parameters

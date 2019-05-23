@@ -62,7 +62,7 @@ echo ""
 echo "****************** Installing PreROIPooling ******************"
 base_dir=$(pwd)
 cd ltr/external/PreciseRoIPooling/pytorch/prroi_pool
-PATH=/usr/local/cuda/bin/:$PATH
+PATH=/usr/local/cuda/9.1.85/bin/:$PATH
 bash travis.sh
 cd $base_dir
 

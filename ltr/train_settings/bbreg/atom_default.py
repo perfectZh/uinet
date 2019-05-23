@@ -28,12 +28,12 @@ def run(settings):
     settings.proposal_params = {'min_iou': 0.1, 'boxes_per_frame': 16, 'sigma_factor': [0.01, 0.05, 0.1, 0.2, 0.3]}
 
     # Train datasets
-    lasot_train = Lasot(split='train')
-    trackingnet_train = TrackingNet(set_ids=list(range(11)))
+    #lasot_train = Lasot(split='train')
+    #trackingnet_train = TrackingNet(set_ids=list(range(1)))
     coco_train = MSCOCOSeq()
 
     # Validation datasets
-    trackingnet_val = TrackingNet(set_ids=list(range(11,12)))
+    trackingnet_val = TrackingNet(set_ids=list(range(1)))
 
     # The joint augmentation transform, that is applied to the pairs jointly
     transform_joint = dltransforms.ToGrayscale(probability=0.05)
@@ -67,8 +67,8 @@ def run(settings):
                                                     joint_transform=transform_joint)
 
     # The sampler for training
-    dataset_train = sampler.ATOMSampler([lasot_train, trackingnet_train, coco_train], [1,1,1],
-                                        samples_per_epoch=1000*settings.batch_size, max_gap=50,
+    dataset_train = sampler.ATOMSampler([coco_train], [1],
+                                        samples_per_epoch=10*settings.batch_size, max_gap=50,
                                         processing=data_processing_train)
 
     # The loader for training

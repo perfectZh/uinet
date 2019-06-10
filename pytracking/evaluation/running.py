@@ -1,6 +1,7 @@
 import numpy as np
 import multiprocessing
 import os
+import torch
 from itertools import product
 from pytracking.evaluation import Sequence, Tracker
 
@@ -22,7 +23,7 @@ def run_sequence(seq: Sequence, tracker: Tracker,dataset_name, debug=False):
     """Runs a tracker on a sequence."""
     print(dataset_name)
     if (dataset_name=="vot"):
-        file_dir= os.path.join(tracker.results_dir,"vot",seq.name)
+        file_dir= os.path.join(tracker.results_dir,"baseline",seq.name)
         mkdir(file_dir)
     else:
         file_dir=tracker.results_dir
@@ -35,8 +36,9 @@ def run_sequence(seq: Sequence, tracker: Tracker,dataset_name, debug=False):
         return
 
     print('Tracker: {} {} {} ,  Sequence: {}'.format(tracker.name, tracker.parameter_name, tracker.run_id, seq.name))
-
+    print(tracker)
     if debug:
+
         tracked_bb, exec_times = tracker.run(seq,debug=debug)
     else:
         try:
@@ -47,7 +49,7 @@ def run_sequence(seq: Sequence, tracker: Tracker,dataset_name, debug=False):
 
     tracked_bb = np.array(tracked_bb).astype(int)
     exec_times = np.array(exec_times).astype(float)
-   
+    torch.cuda.empty_cache()
     print('FPS: {}'.format(len(exec_times) / exec_times.sum()))
     #input()
     

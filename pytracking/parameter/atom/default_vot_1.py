@@ -23,8 +23,8 @@ def parameters():
     params.feature_size_odd = False                 # Good to use False for even-sized kernels and vice versa
 
     # Optimization parameters
-    params.CG_iter = 5                    # The number of Conjugate Gradient iterations in each update after the first frame
-    params.init_CG_iter = 60              # The total number of Conjugate Gradient iterations used in the first frame
+    params.CG_iter = 8                    # The number of Conjugate Gradient iterations in each update after the first frame
+    params.init_CG_iter = 80              # The total number of Conjugate Gradient iterations used in the first frame
     params.init_GN_iter = 6               # The number of Gauss-Newton iterations used in the first frame (only if the projection matrix is updated)
     params.post_init_CG_iter = 0          # CG iterations to run after GN
     params.fletcher_reeves = False        # Use the Fletcher-Reeves (true) or Polak-Ribiere (false) formula in the Conjugate Gradient
@@ -32,7 +32,7 @@ def parameters():
     params.CG_forgetting_rate = None	  # Forgetting rate of the last conjugate direction
 
     # Learning parameters for each feature type
-    deep_params.learning_rate = 0.0075           # Learning rate
+    deep_params.learning_rate = 0.0045           # Learning rate
     deep_params.output_sigma_factor = 1/4        # Standard deviation of Gaussian label relative to target size
 
     # Training parameters
@@ -40,13 +40,13 @@ def parameters():
     params.train_skipping = 10                   # How often to run training (every n-th frame)
 
     # Online model parameters
-    deep_params.kernel_size = (4, 4)             # Kernel size of filter
+    deep_params.kernel_size = (8, 8)             # Kernel size of filter
     deep_params.compressed_dim = 64              # Dimension output of projection matrix
     deep_params.filter_reg = 1e-1                # Filter regularization factor
     deep_params.projection_reg = 1e-4            # Projection regularization factor
 
     # Windowing
-    params.feature_window = False                # Perform windowing of features
+    params.feature_window = True                # Perform windowing of features
     params.window_output = True                  # Perform windowing of output scores
 
     # Detection parameters
@@ -77,7 +77,7 @@ def parameters():
     params.target_not_found_threshold = -1      # Absolute score threshold to detect target missing
     params.distractor_threshold = 100           # Relative threshold to find distractors
     params.hard_negative_threshold = 0.3        # Relative threshold to find hard negative samples
-    params.target_neighborhood_scale = 2.2      # Target neighborhood to remove
+    params.target_neighborhood_scale = 4      # Target neighborhood to remove
     params.dispalcement_scale = 0.7             # Dispacement to consider for distractors
     params.hard_negative_learning_rate = 0.02   # Learning rate if hard negative detected
     params.hard_negative_CG_iter = 5            # Number of optimization iterations to use if hard negative detected
@@ -85,8 +85,8 @@ def parameters():
 
     # IoUNet parameters
     params.iounet_augmentation = False      # Use the augmented samples to compute the modulation vector
-    params.iounet_k = 3                     # Top-k average to estimate final box
-    params.num_init_random_boxes = 9        # Num extra random boxes in addition to the classifier prediction
+    params.iounet_k = 8                     # Top-k average to estimate final box
+    params.num_init_random_boxes = 15        # Num extra random boxes in addition to the classifier prediction
     params.box_jitter_pos = 0.1             # How much to jitter the translation for random boxes
     params.box_jitter_sz = 0.5              # How much to jitter the scale for random boxes
     params.maximal_aspect_ratio = 6         # Limit on the aspect ratio
@@ -96,7 +96,7 @@ def parameters():
 
     # Setup the feature extractor (which includes the IoUNet)
     deep_fparams = FeatureParams(feature_params=[deep_params])
-    deep_feat = deep.ATOMResNet18(net_path='atom_default.pth', output_layers=['layer3'], fparams=deep_fparams,
+    deep_feat = deep.ATOMResNet18(net_path='atom_default.pth', output_layers=['layer3','layer4'], fparams=deep_fparams,
                                   normalize_power=2)
 
     params.features = MultiResolutionExtractor([deep_feat])

@@ -136,7 +136,7 @@ class BaseTracker:
                 cv.putText(frame_disp, 'Press q to quit', (20, 80), cv.FONT_HERSHEY_COMPLEX_SMALL, 1,
                            font_color, 1)
             # Display the resulting frame
-            cv.imshow(display_name, frame_disp)
+            #cv.imshow(display_name, frame_disp)
             key = cv.waitKey(1)
             if key == ord('q'):
                 break

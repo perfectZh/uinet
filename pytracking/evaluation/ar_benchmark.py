@@ -51,7 +51,7 @@ class AccuracyRobustnessBenchmark:
             result: returned dict from function eval
         """
         tracker_name_len = max((max([len(x) for x in result.keys()])+2), 12)
-        if eao_result is not None:
+        if eao_result is not None:num_failures_group
             header = "|{:^"+str(tracker_name_len)+"}|{:^10}|{:^12}|{:^13}|{:^7}|"
             header = header.format('Tracker Name',
                     'Accuracy', 'Robustness', 'Lost Number', 'EAO')

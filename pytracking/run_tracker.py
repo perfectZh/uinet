@@ -68,7 +68,7 @@ def main():
     parser.add_argument('--dataset', type=str, default='otb', help='Name of dataset (otb, nfs, uav, tpl, vot, tn, gott, gotv, lasot).')
     parser.add_argument('--sequence', type=str, default=None, help='Sequence number or name.')
     parser.add_argument('--debug', type=int, default=0, help='Debug level.')
-    parser.add_argument('--threads', type=int, default=8, help='Number of threads.')
+    parser.add_argument('--threads', type=int, default=4, help='Number of threads.')
 
     args = parser.parse_args()
 

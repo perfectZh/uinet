@@ -33,6 +33,27 @@ class Tracker:
         self.default_visualization = getattr(self.parameters, 'visualization', False)
         self.default_debug = getattr(self.parameters, 'debug', 0)
         #
+    
+
+    def get_tracker(self,visualization=None, debug=None):
+        visualization_ = visualization
+        debug_ = debug
+        if debug is None:
+            debug_ = self.default_debug
+        if visualization is None:
+            if debug is None:
+                visualization_ = self.default_visualization
+            else:
+                visualization_ = True if debug else False
+
+        self.parameters.visualization = visualization_
+        self.parameters.debug = debug_
+        tracker = self.tracker_class(self.parameters)
+        return tracker
+    
+    def free():
+        self.parameters.free_memory()
+        return None
 
     def run(self, seq, visualization=None, debug=None):
         """Run tracker on sequence.

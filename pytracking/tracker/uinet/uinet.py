@@ -13,7 +13,7 @@ from pytracking.features import augmentation
 
 Debug = False
 
-class ATOM(BaseTracker):
+class UInet(BaseTracker):
 
     def initialize_features(self):
         if not getattr(self, 'features_initialized', False):
@@ -405,6 +405,7 @@ class ATOM(BaseTracker):
 
     def extract_sample(self, im: torch.Tensor, pos: torch.Tensor, scales, sz: torch.Tensor):
         #提取特征
+
         return self.params.features.extract(im, pos, scales, sz)
 
     def get_iou_features(self):
@@ -719,15 +720,15 @@ class ATOM(BaseTracker):
             init_boxes = torch.cat([init_box.view(1,4), init_boxes])
 
         # Refine boxes by maximizing iou# 对于每个bb,5次梯度下降迭代最大化IOU得到最后bb
-        print("init_boxes",init_boxes)
+
         output_boxes, output_iou = self.optimize_boxes(iou_features, init_boxes)
-        print("output_boxes",output_boxes)
+         
         # Remove weird boxes with extreme aspect ratios
-        output_boxes[:, 2:].clamp_(1) 
+        output_boxes[:, 2:].clamp_(1)
         aspect_ratio = output_boxes[:,2] / output_boxes[:,3]
         keep_ind = (aspect_ratio < self.params.maximal_aspect_ratio) * (aspect_ratio > 1/self.params.maximal_aspect_ratio)
         output_boxes = output_boxes[keep_ind,:]
-        output_iou = output_iou[keep_ind] 
+        output_iou = output_iou[keep_ind]
         # If no box found
         if output_boxes.shape[0] == 0:
             return
@@ -736,10 +737,10 @@ class ATOM(BaseTracker):
         k = getattr(self.params, 'iounet_k', 5)
         topk = min(k, output_boxes.shape[0])
         _, inds = torch.topk(output_iou, topk) #找到topk个 bb
-        predicted_box = output_boxes[inds, :].mean(0) #把topk个取平均值
+        predicted_box = output_boxes[inds, :].mean(0) #把topk个取平均值 //替换为最大值。
         predicted_iou = output_iou.view(-1, 1)[inds, :].mean(0)
+
         # Update position
-        # 将unet的信息加入
         new_pos = predicted_box[:2] + predicted_box[2:]/2 - (self.iou_img_sample_sz - 1) / 2
         new_pos = new_pos.flip((0,)) * sample_scale + sample_pos
         new_target_sz = predicted_box[2:].flip((0,)) * sample_scale
@@ -754,16 +755,35 @@ class ATOM(BaseTracker):
 
         if update_scale:
             self.target_scale = new_scale
+    
+    def refine_features(target_feat,init_boxes):
+        #输入的为特征，乘以mask。
+        #mask 为大的mask × BB
+        #输入的为feature，输出的为mask。
+        #首先获取mask。直接用unet的输出代替。
+        #先用简单的mask来代替。
+        feat=target_feat*mask
+        
+        return feat
 
+    def refine_channels(target_feat):
+        #特征乘以channels的权重。
+        #只需要对第一帧做。
+        #
+        #找到bbox 中属于ax的channels。然后赋予相应的权重。
+        feat=target_feat*mask
+        return feat
 
     def optimize_boxes(self, iou_features, init_boxes):
         # Optimize iounet boxes
         output_boxes = init_boxes.view(1, -1, 4).to(self.params.device)
         step_length = self.params.box_refinement_step_length ## Gradient step length in the bounding box refinement
+        iou_features=refine_features(iou_features)
+        iou_features=refine_channels(iou_features)
+
         #根据max 来修正位置。
         #feature 乘以一个mask，来过滤掉无关的信息。
         #target_feat=self.target_feat*mask
-        outputs=0
         for i_ in range(self.params.box_refinement_iter): #5 次梯度下降迭代最优化得到最佳bb 
             # forward pass
             bb_init = output_boxes.clone().detach()
@@ -783,5 +803,5 @@ class ATOM(BaseTracker):
             output_boxes.detach_() #将输出进行分离，就不会再次求梯度。不需要梯度
 
             step_length *= self.params.box_refinement_step_decay # # Multiplicative step length decay (1 means no decay)
-        print("iou:",outputs)
+
         return output_boxes.view(-1,4).cpu(), outputs.detach().view(-1).cpu()

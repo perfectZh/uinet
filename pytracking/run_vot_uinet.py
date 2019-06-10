@@ -19,14 +19,6 @@ if env_path not in sys.path:
 del os.environ['MKL_NUM_THREADS']
 
 from pytracking.evaluation import Tracker
-from pytracking.evaluation.otbdataset import OTBDataset
-from pytracking.evaluation.nfsdataset import NFSDataset
-from pytracking.evaluation.uavdataset import UAVDataset
-from pytracking.evaluation.tpldataset import TPLDataset
-from pytracking.evaluation.votdataset import VOTDataset
-from pytracking.evaluation.lasotdataset import LaSOTDataset
-from pytracking.evaluation.trackingnetdataset import TrackingNetDataset
-from pytracking.evaluation.got10kdataset import GOT10KDatasetTest, GOT10KDatasetVal, GOT10KDatasetLTRVal
 from pytracking.evaluation.running import run_dataset
 from pytracking.evaluation import Tracker
 
@@ -62,7 +54,7 @@ if not imagefile:
     sys.exit(0)
 
 
-tracker_param="default_vot"
+tracker_param="default_vot_2"
 tracker_name="atom"
 
 tracker_ = Tracker(tracker_name, tracker_param, 0)

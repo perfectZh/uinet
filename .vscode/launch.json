@@ -11,12 +11,8 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "args": ["atom",
-                "default_vot",
-                "--dataset",
-                "vot" ,
-                "--sequence",
-                "test"
+            "args": ["uinet",
+                "uinet_default"
                 ]
         },
         {

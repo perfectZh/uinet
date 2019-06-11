@@ -3,7 +3,7 @@ import torch.nn as nn
 from collections import OrderedDict
 import torch.utils.model_zoo as model_zoo
 from torchvision.models.resnet import BasicBlock, Bottleneck, model_urls
-
+import torch
 
 class ResNet(nn.Module):
     """ ResNet network module. Allows extracting specific feature blocks."""
@@ -16,6 +16,7 @@ class ResNet(nn.Module):
         self.bn1 = nn.BatchNorm2d(inplanes)
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+       
         self.layer1 = self._make_layer(block, inplanes, layers[0])
         self.layer2 = self._make_layer(block, inplanes*2, layers[1], stride=2)
         self.layer3 = self._make_layer(block, inplanes*4, layers[2], stride=2)
@@ -60,34 +61,40 @@ class ResNet(nn.Module):
 
         if output_layers is None:
             output_layers = self.output_layers
-
+        print("x",x.shape)
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
-
+        print("conv1",x.shape)
         if self._add_output_and_check('conv1', x, outputs, output_layers):
+            #outputs=torch.stack(list(outputs.items()))
+
             return outputs
 
         x = self.maxpool(x)
 
         x = self.layer1(x)
-
+        print("lay1",x.shape)
         if self._add_output_and_check('layer1', x, outputs, output_layers):
+            #outputs=torch.stack(list(outputs.items()))
             return outputs
 
         x = self.layer2(x)
-
+        print("lay2",x.shape)
         if self._add_output_and_check('layer2', x, outputs, output_layers):
+            #outputs=torch.stack(list(outputs.items()))
             return outputs
 
         x = self.layer3(x)
-
+        print("lay3",x.shape)
         if self._add_output_and_check('layer3', x, outputs, output_layers):
+            #outputs=torch.stack(list(outputs.items()))
             return outputs
 
         x = self.layer4(x)
-
+        print("lay4",x.shape)
         if self._add_output_and_check('layer4', x, outputs, output_layers):
+            #outputs=torch.stack(list(outputs.items()))
             return outputs
 
         x = self.avgpool(x)
@@ -95,6 +102,7 @@ class ResNet(nn.Module):
         x = self.fc(x)
 
         if self._add_output_and_check('fc', x, outputs, output_layers):
+            #outputs=torch.stack(list(outputs.items()))
             return outputs
 
         if len(output_layers) == 1 and output_layers[0] == 'default':
@@ -136,3 +144,7 @@ def resnet50(output_layers=None, pretrained=False):
     if pretrained:
         model.load_state_dict(model_zoo.load_url(model_urls['resnet50']))
     return model
+
+if __name__ == '__main__':
+    model = ResNet(BasicBlock, [2, 2, 2, 2], 'layer1')
+    print(model)

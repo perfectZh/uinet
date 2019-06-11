@@ -47,8 +47,8 @@ class LTRTrainer(BaseTrainer):
 
         self._init_timing()
 
-        for i, data in enumerate(loader, 1):
-            # get inputs
+        for i, data in enumerate(loader,1):
+            print( "get inputs")
             data = data.to(self.device)
             data['epoch'] = self.epoch
             data['settings'] = self.settings

@@ -12,7 +12,7 @@ class BaseActor:
         """
         self.net = net
         self.objective = objective
-
+        self.device='cpu'
     def __call__(self, data: TensorDict):
         """ Called in each training iteration. Should pass in input data through the network, calculate the loss, and
         return the training stats for the input data
@@ -30,6 +30,7 @@ class BaseActor:
         args:
             device - device to use. 'cpu' or 'cuda'
         """
+        self.device=device
         self.net.to(device)
 
     def train(self, mode=True):

@@ -61,15 +61,29 @@ def ltr_collate_stack1(batch):
 
     error_msg = "batch must contain tensors, numbers, dicts or lists; found {}"
     elem_type = type(batch[0])
+    print("batch 0 elem_type",elem_type)
+    print ("batch len",len(batch))
+    #print("batch shape",batch[0].shape)
+#    print("batch[0]",batch[0])
+#    print("batch[0]",batch[0].shape)
+#   print("batch[1]",batch[1])
+#   print("batch[1]",batch[1].shape)
+    #print("batch",batch.shape)
     if isinstance(batch[0], torch.Tensor):
         out = None
+        print("batch[0]",batch[0].shape)
         if torch.utils.data.dataloader._use_shared_memory:
             # If we're in a background process, concatenate directly into a
             # shared memory tensor to avoid an extra copy
-            numel = sum([x.numel() for x in batch])
+            numel = sum([x.numel() for x in batch]) # torch.numel() 返回一个tensor变量内所有元素个数,可以理解为矩阵内元素的个数 
             storage = batch[0].storage()._new_shared(numel)
+            
             out = batch[0].new(storage)
-        return torch.stack(batch, 1, out=out)
+            print("out: ",out.shape)
+            print("out: ",out)
+        s= torch.stack(batch, 1, out=out) 
+        print("s.shape",s.shape)  
+        return s
         # if batch[0].dim() < 4:
         #     return torch.stack(batch, 0, out=out)
         # return torch.cat(batch, 0, out=out)
@@ -84,7 +98,7 @@ def ltr_collate_stack1(batch):
             return torch.stack([torch.from_numpy(b) for b in batch], 1)
         if elem.shape == ():  # scalars
             py_type = float if elem.dtype.name.startswith('float') else int
-            return torch.utils.data.dataloader.numpy_type_map[elem.dtype.name](list(map(py_type, batch)))
+            return torch.utils.data.dataloader.numpy_type_GTap[elem.dtype.name](list(map(py_type, batch)))
     elif isinstance(batch[0], int_classes):
         return torch.LongTensor(batch)
     elif isinstance(batch[0], float):

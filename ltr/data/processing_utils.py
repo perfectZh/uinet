@@ -3,7 +3,7 @@ import math
 import cv2 as cv
 import random
 from random import gauss
-
+import numpy as np
 
 def stack_tensors(x):
     if isinstance(x, list) and isinstance(x[0], torch.Tensor):
@@ -46,10 +46,16 @@ def sample_target(im, target_bb, search_area_factor, output_sz=None):
     y2_pad = max(y2-im.shape[0]+1, 0)
 
     # Crop target
-    im_crop = im[y1+y1_pad:y2-y2_pad, x1+x1_pad:x2-x2_pad, :]
-
+    print("im.shape",im.shape)
+    print("im_type",type(im))
+    if(im.shape[-1]==3):
+        im = im[y1+y1_pad:y2-y2_pad, x1+x1_pad:x2-x2_pad, :]
+        im_crop_padded = cv.copyMakeBorder(im, y1_pad, y2_pad, x1_pad, x2_pad, cv.BORDER_REPLICATE)
+    else:
+        im = im[y1+y1_pad:y2-y2_pad, x1+x1_pad:x2-x2_pad]
+        im_crop_padded = cv.copyMakeBorder(im.numpy(), y1_pad, y2_pad, x1_pad, x2_pad, cv.BORDER_REPLICATE)
     # Pad
-    im_crop_padded = cv.copyMakeBorder(im_crop, y1_pad, y2_pad, x1_pad, x2_pad, cv.BORDER_REPLICATE)
+    
 
     if output_sz is not None:
         resize_factor = output_sz / crop_sz

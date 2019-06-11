@@ -18,10 +18,10 @@ class AtomActor(BaseActor):
 
         iou_pred = iou_pred.view(-1, iou_pred.shape[2])
         iou_gt = data['proposal_iou'].view(-1, data['proposal_iou'].shape[2])
-
+        print("iou_pred.size()",iou_pred.size())
         # Compute loss
         loss = self.objective(iou_pred, iou_gt)
-
+        
         # Return training stats
         stats = {'Loss/total': loss.item(),
                  'Loss/iou': loss.item()}

@@ -14,7 +14,7 @@ def run(settings):
     # Most common settings are assigned in the settings struct
     settings.description = 'ATOM IoUNet with default settings.'
     settings.print_interval = 1                                 # How often to print loss and other info
-    settings.batch_size = 64                                    # Batch size
+    settings.batch_size = 4                                   # Batch size
     settings.num_workers = 4                                    # Number of workers for image loading
     settings.normalize_mean = [0.485, 0.456, 0.406]             # Normalize mean (default pytorch ImageNet values)
     settings.normalize_std = [0.229, 0.224, 0.225]              # Normalize std (default pytorch ImageNet values)
@@ -33,7 +33,7 @@ def run(settings):
     coco_train = MSCOCOSeq()
 
     # Validation datasets
-    trackingnet_val = TrackingNet(set_ids=list(range(1)))
+    #trackingnet_val = TrackingNet(set_ids=list(range(1)))
 
     # The joint augmentation transform, that is applied to the pairs jointly
     transform_joint = dltransforms.ToGrayscale(probability=0.05)
@@ -76,12 +76,11 @@ def run(settings):
                              shuffle=True, drop_last=True, stack_dim=1)
 
     # The sampler for validation
-    dataset_val = sampler.ATOMSampler([trackingnet_val], [1], samples_per_epoch=500*settings.batch_size, max_gap=50,
-                                      processing=data_processing_val)
+    dataset_val = dataset_train
 
     # The loader for validation
-    loader_val = LTRLoader('val', dataset_val, training=False, batch_size=settings.batch_size, num_workers=settings.num_workers,
-                           shuffle=False, drop_last=True, epoch_interval=5, stack_dim=1)
+    loader_val = loader_train 
+    #LTRLoader('val', dataset_val, training=False, batch_size=settings.batch_size, num_workers=settings.num_workers,                       shuffle=False, drop_last=True, epoch_interval=5, stack_dim=1)
 
     # Create network
     net = atom_models.atom_resnet18(backbone_pretrained=True)

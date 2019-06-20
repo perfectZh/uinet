@@ -55,7 +55,7 @@ if not imagefile:
 
 
 tracker_param="default_vot_2"
-tracker_name="atom"
+tracker_name="uinet"
 
 tracker_ = Tracker(tracker_name, tracker_param, 0)
 tracker=tracker_.runvot()

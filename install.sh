@@ -7,7 +7,7 @@
 
 
 conda_install_path=/home/peter/anaconda2/
-conda_env_name=pytracking
+conda_env_name=uinet
 
 #source $conda_install_path/etc/profile.d/conda.sh
 #echo "****************** Creating conda environment ${conda_env_name} python=3.7 ******************"
@@ -74,8 +74,8 @@ mkdir pytracking/networks
 
 echo ""
 echo ""
-echo "****************** ATOM Network ******************"
-bash pytracking/utils/gdrive_download 1ZTdQbZ1tyN27UIwUnUrjHChQb5ug2sxr pytracking/networks/atom_default.pth
+echo "****************** UINet Network ******************"
+bash pytracking/utils/gdrive_download 1ZTdQbZ1tyN27UIwUnUrjHChQb5ug233 pytracking/networks/uinet_default.pth
 
 echo ""
 echo ""

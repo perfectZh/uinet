@@ -12,7 +12,7 @@ bash install.sh conda_install_path uinet
 
 
 #### Test
-Activate the conda environment and run the script pytracking/run_webcam.py to run ATOM using the webcam input.  
+Activate the conda environment and run the script pytracking/run_webcam.py to run using the webcam input.  
 ```bash
 conda activate uinet
 cd uinet
